@@ -132,9 +132,10 @@ Argument TIME time at which the heartbeat was computed."
 
 (defun activity-watch--save ()
   "Send save notice to Activity-Watch."
-  (when (and (buffer-file-name (current-buffer))
-             (not (auto-save-file-name-p (buffer-file-name (current-buffer)))))
-    (activity-watch--call)))
+  (save-match-data
+    (when (and (buffer-file-name (current-buffer))
+               (not (auto-save-file-name-p (buffer-file-name (current-buffer)))))
+      (activity-watch--call))))
 
 (defun activity-watch--start-timer ()
   "Start timers for heartbeat submission and idling."
