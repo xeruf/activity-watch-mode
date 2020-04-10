@@ -90,7 +90,7 @@
                                   (client . ,activity-watch-user-agent)
                                   (type . "app.editor.activity")))
              :headers '(("Content-Type" . "application/json"))
-             :success (function*
+             :success (cl-function
                        (lambda (&allow-other-keys)
                          (setq activity-watch-bucket-created t))))))
 
@@ -113,7 +113,7 @@ Argument TIME time at which the heartbeat was computed."
            :params `(("pulsetime" . ,activity-watch-pulse-time))
            :data (json-encode heartbeat)
            :headers '(("Content-Type" . "application/json"))
-           :error (function*
+           :error (cl-function
                    (lambda (&key data &allow-other-keys)
                      (message data)))))
 
