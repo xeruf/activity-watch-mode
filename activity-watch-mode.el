@@ -214,13 +214,14 @@ specified in `activity-watch-project-name-resolvers'."
   "Create heartbeart to sent to the activity watch server.
 Argument TIME time at which the heartbeat was computed."
   (let ((project-name (activity-watch--get-project))
-        (file-name (buffer-file-name (current-buffer))))
+        (file-name (buffer-file-name (current-buffer)))
+        (git-branch (when (fboundp 'magit-get-current-branch) (magit-get-current-branch))))
     `((timestamp . ,(ert--format-time-iso8601 time))
       (duration . 0)
       (data . ((language . ,(if (activity-watch--s-blank (symbol-name major-mode)) "unknown" major-mode))
                (project . ,project-name)
-               (file . ,(if (activity-watch--s-blank file-name) "unknown" file-name)))))))
-
+               (file . ,(if (activity-watch--s-blank file-name) "unknown" file-name))
+               (branch . ,(or git-branch "unknown")))))))
 
 (defun activity-watch--send-heartbeat (heartbeat)
   "Send HEARTBEAT to activity watch server."
