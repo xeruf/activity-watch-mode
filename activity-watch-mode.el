@@ -223,16 +223,16 @@ Argument TIME time at which the heartbeat was computed."
                (file . ,(if (activity-watch--s-blank file-name) "unknown" file-name))
                (branch . ,(or git-branch "unknown")))))))
 
-(defun activity-watch--send-heartbeat (heartbeat)
-  "Send HEARTBEAT to activity watch server."
+(cl-defun activity-watch--send-heartbeat (heartbeat &key (on-error nil) (on-success nil))
+  "Send HEARTBEAT to activity watch server, calling ON-ERROR on error and ON-SUCCESS on success."
   (request (concat activity-watch-api-host "/api/0/buckets/" (activity-watch--bucket-id) "/heartbeat")
            :type "POST"
            :params `(("pulsetime" . ,activity-watch-pulse-time))
            :data (json-encode heartbeat)
            :headers '(("Content-Type" . "application/json"))
-           :error (cl-function
-                   (lambda (&key data &allow-other-keys)
-                     (message data) (global-activity-watch-mode 0) (activity-watch-mode 0)))))
+           :success on-success
+           :error on-error
+  ))
 
 (defun activity-watch--call ()
   "Conditionally submit heartbeat to activity watch."
@@ -245,7 +245,10 @@ Argument TIME time at which the heartbeat was computed."
         (progn
           (setq activity-watch-last-file-path current-file-path)
           (setq activity-watch-last-heartbeat-time now)
-          (activity-watch--send-heartbeat (activity-watch--create-heartbeat (current-time)))))))
+          (activity-watch--send-heartbeat (activity-watch--create-heartbeat (current-time))
+                                          :on-error (cl-function (lambda (&key data &allow-other-keys)
+                                                                   (message data) (global-activity-watch-mode 0) (activity-watch-mode 0)))
+          )))))
 
 (defun activity-watch--save ()
   "Send save notice to Activity-Watch."
